@@ -1,4 +1,4 @@
-import CheckUniswapTx from "@/components/check/CheckUniswapTx";
+import CheckAge from "@/components/check/CheckAge";
 import Title from "@/components/ui/Title";
 
 export default async function Check() {
@@ -7,7 +7,7 @@ export default async function Check() {
       <Title>
         Check eligibility
       </Title>
-      <CheckUniswapTx />
+      <CheckAge />
     </>
   )
 }

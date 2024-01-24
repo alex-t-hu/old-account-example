@@ -1,4 +1,6 @@
 import { Constants } from "@/shared/constants";
+import { JsonRpcProvider } from "ethers";
+
 import { bytes32 } from "./utils";
 
 export async function findMostRecentUniswapTx(address: string): Promise<{
@@ -35,7 +37,7 @@ export async function findMostRecentUniswapTx(address: string): Promise<{
             return {
               blockNumber: Number(log.blockNumber).toString(),
               txIdx: Number(log.transactionIndex).toString(),
-              logIdx: idx.toString(), 
+              logIdx: idx.toString(),
             }
           }
         }
@@ -48,7 +50,7 @@ export async function findMostRecentUniswapTx(address: string): Promise<{
 }
 
 async function getRecentTxs(address: string, pageKey?: string) {
-  let params: {[key: string]: any} = {
+  let params: { [key: string]: any } = {
     "fromBlock": "0x" + BigInt(Constants.ELIGIBLE_BLOCK_HEIGHT).toString(16),
     "toBlock": "latest",
     "fromAddress": address.toLowerCase(),
@@ -107,4 +109,42 @@ async function getRecentReceipt(hash: string) {
   } catch (e) {
     return null;
   }
+}
+
+export async function getFirstTxBlockNumber(address: string): Promise<{
+  blockNumber: number,
+  txIdx: number,
+} | null> {
+  try {
+    const res = await fetch("https://api-sepolia.etherscan.io/api?" + new URLSearchParams({
+      module: "account",
+      action: "txlist",
+      address,
+      startblock: "0",
+      endblock: "99999999",
+      sort: "asc",
+      apikey: process.env.ETHERSCAN_API_KEY as string,
+    }));
+    const json = await res.json();
+    for (const tx of json.result) {
+      // check if transaction is a account creation transaction
+      console.log("tx is ", tx);
+      console.log("json is ", json);
+      if (tx.to.toLowerCase() === address.toLowerCase()) {
+        return {
+          blockNumber: parseInt(tx.blockNumber),
+          txIdx: parseInt(tx.transactionIndex),
+        }
+      }
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+export const getCurrentBlock = async (): Promise<number> => {
+  const providerUri = process.env.NEXT_PUBLIC_ALCHEMY_URI_SEPOLIA as string;
+  const provider = new JsonRpcProvider(providerUri);
+  const blockNumber = await provider.getBlockNumber();
+  return blockNumber;
 }

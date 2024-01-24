@@ -22,7 +22,7 @@ export default async function Prove({ searchParams }: PageProps) {
   const inputs: UserInput<typeof jsonInputs> = {
     blockNumber: Number(searchParams.blockNumber),
     txIdx: Number(searchParams.txIdx),
-    logIdx: Number(searchParams.logIdx),
+    // logIdx: Number(searchParams.logIdx),
   };
 
   return (
